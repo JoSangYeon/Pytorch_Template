@@ -42,7 +42,7 @@ def train(model, device, optimizer, criterion, epochs, train_loader, valid_loade
         # in interpreter
         pbar = tqdm(enumerate(train_loader), file=sys.stdout)
         for batch_idx, (data, target) in pbar:
-            data, target == data.to(device), target.to(device)
+            data, target = data.to(device), target.to(device)
 
             optimizer.zero_grad()
             output = model(data)
