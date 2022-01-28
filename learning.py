@@ -31,6 +31,7 @@ def train(model, device, optimizer, criterion, epochs, train_loader, valid_loade
         'valid_loss': [],
         'valid_acc': []
     }
+    model.to(device)
     for epoch in range(1, epochs + 1):
         model.train()
         train_loss = train_acc = 0
@@ -53,8 +54,8 @@ def train(model, device, optimizer, criterion, epochs, train_loader, valid_loade
             train_loss += loss.item()
             train_acc += acc
 
-            acc /= (batch_idx * train_loader.batch_size + len(data))
-            pbar.set_postfix(epoch=f'{epoch}/{epochs}', loss=f'{loss}, acc={acc}')
+            acc = train_acc / (batch_idx * train_loader.batch_size + len(data))
+            pbar.set_postfix(epoch=f'{epoch}/{epochs}', loss='{:.6f}, acc={:.3f}'.format(loss, acc))
         pbar.close()
 
         train_loss = train_loss / len(train_loader)
@@ -100,8 +101,8 @@ def evaluate(model, device, criterion, data_loader):
             total_loss += loss.item()
             total_acc += acc
 
-            acc /= (batch_idx * data_loader.batch_size + len(data))
-            pbar.set_postfix(loss=f'{loss}, acc={acc}')
+            acc = total_acc / (batch_idx * data_loader.batch_size + len(data))
+            pbar.set_postfix(loss='{:.6f}, acc={:.3f}'.format(loss, acc))
         pbar.close()
 
     total_loss = total_loss / len(data_loader)
