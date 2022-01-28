@@ -1,33 +1,35 @@
 # https://github.com/HideOnHouse/TorchBase
 
 import torch
-from torch.utils.data import DataLoader
+import torch.nn as nn
+import torch.nn.functional as F
+import torch.optim as optim
+from torch.utils.data import Dataset, DataLoader
 
-from dataset import CustomDataset
-from model import CustomModel
-from test import test
-from train import train
+from dataset import MyDataset
+from model import MyModel
+from learning import train, evaluate, calc_acc
 from inference import inference
 
 
 def main():
-    model = CustomModel()
+    model = MyModel()
     # train
-    train_dataset = CustomDataset()
-    train_dataloader = DataLoader(train_dataset, batch_size=1024, shuffle=True)
+    train_dataset = MyDataset()
+    train_dataloader = DataLoader(train_dataset, batch_size=32, shuffle=True)
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     optimizer = torch.optim.AdamW(model.parameters())
     criterion = torch.nn.CrossEntropyLoss()
     history = train(model, device, optimizer, criterion, 16, train_dataloader)
 
     # Test
-    test_dataset = CustomDataset()
-    test_dataloader = DataLoader(test_dataset, batch_size=1024, shuffle=False)
-    test(model, device, test_dataloader, criterion)
+    test_dataset = MyDataset()
+    test_dataloader = DataLoader(test_dataset, batch_size=32, shuffle=False)
+    evaluate(model, device, test_dataloader, criterion)
 
     # Inference
-    infer_dataset = CustomDataset()
-    infer_dataloader = DataLoader(infer_dataset, batch_size=1024, shuffle=False)
+    infer_dataset = MyDataset()
+    infer_dataloader = DataLoader(infer_dataset, batch_size=32, shuffle=False)
     inference(model, device, infer_dataloader)
 
 
