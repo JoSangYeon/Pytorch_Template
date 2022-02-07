@@ -1,7 +1,9 @@
 # https://github.com/HideOnHouse/TorchBase
 
+import pickle
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 
 import torch
 import torch.nn as nn
@@ -15,6 +17,23 @@ from model import MyModel
 from learning import train, evaluate, calc_acc
 from inference import inference
 
+def draw_history(history):
+    train_loss = history["train_loss"]
+    train_acc = history["train_acc"]
+    valid_loss = history["valid_loss"]
+    valid_acc = history["valid_acc"]
+
+    plt.subplot(2,1,1)
+    plt.plot(train_loss, label="train")
+    plt.plot(valid_loss, label="valid")
+    plt.legend()
+
+    plt.subplot(2,1,2)
+    plt.plot(train_acc, label="train")
+    plt.plot(valid_acc, label="valid")
+    plt.legend()
+
+    plt.show()
 
 def main():
     train_path = ""
@@ -58,12 +77,25 @@ def main():
     criterion = torch.nn.CrossEntropyLoss()
 
     # train
+    print("============================= Train =============================")
     history = train(model, device, optimizer, criterion, 16, train_loader, valid_loader)
 
     # Test
+    print("============================= Test =============================")
     test_loss, test_acc = evaluate(model, device, test_loader, criterion)
+    print("test loss : {:.6f}".format(test_loss))
+    print("test acc : {:.3f}".format(test_acc))
+
+    file_name = "model1"
+    torch.save(model, f"models/{file_name}.pt")
+    with open(f"models/{file_name}_history.pickle", 'wb') as f:
+        pickle.dump(history, f, pickle.HIGHEST_PROTOCOL)
+
+    # print(history)
+    draw_history(history)
 
     # Inference
+    # print("=========================== Inference ===========================")
     # inference(model, device, infer_dataloader)
 
 
