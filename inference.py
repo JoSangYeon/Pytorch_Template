@@ -11,12 +11,14 @@ def inference(device, criterion, inference_loader):
         if file[-2:] != "pt":
             continue
 
-        model = torch.load(file)
+        model = torch.load(f"models/"+file)
         model.to(device); model.eval()
-        loss, acc = evaluate(model, device, criterion, inference_loader)
+
         print("Inference {}".format(file))
+        loss, acc = evaluate(model, device, criterion, inference_loader)
         print("\tloss : {:.6f}".format(loss))
         print("\tacc : {:.3f}".format(acc))
+        print("\n")
 
 
 

@@ -96,7 +96,7 @@ def main():
 
     # Inference
     # print("=========================== Inference ===========================")
-    # inference(model, device, infer_dataloader)
+    # inference(device, criterion, infer_dataloader)
 
 
 if __name__ == '__main__':
