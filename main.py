@@ -13,7 +13,7 @@ from torch.utils.data import Dataset, DataLoader
 from sklearn.model_selection import train_test_split
 
 from dataset import MyDataset
-from model import MyModel
+from model import get_Model
 from learning import train, evaluate, calc_acc
 from inference import inference
 
@@ -71,7 +71,8 @@ def main():
     # label_tags
     label_tags = ['T-Shirt', 'Trouser', 'Pullover', 'Dress', 'Coat', 'Sandal', 'Shirt', 'Sneaker', 'Bag', 'Ankle Boot']
 
-    model = MyModel()
+    model_name = "MyModel_1"
+    model = get_Model(model_name)
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     optimizer = torch.optim.AdamW(model.parameters())
     criterion = torch.nn.CrossEntropyLoss()
@@ -86,7 +87,7 @@ def main():
     print("test loss : {:.6f}".format(test_loss))
     print("test acc : {:.3f}".format(test_acc))
 
-    file_name = "model1"
+    file_name = model_name
     torch.save(model, f"models/{file_name}.pt")
     with open(f"models/{file_name}_history.pickle", 'wb') as f:
         pickle.dump(history, f, pickle.HIGHEST_PROTOCOL)

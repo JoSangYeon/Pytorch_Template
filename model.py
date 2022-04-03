@@ -11,6 +11,13 @@ class MyModel(nn.Module):
     def forward(self, x):
         return x
 
+def get_Model(class_name):
+    try:
+        Myclass = eval(class_name)()
+        return Myclass
+    except NameError as e:
+        print("Class [{}] is not defined".format(class_name))
+
 def main():
     pass
 
