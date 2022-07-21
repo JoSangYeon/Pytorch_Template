@@ -34,7 +34,7 @@ def train(model, device, optimizer, criterion, epochs, train_loader, valid_loade
     model.to(device)
     for epoch in range(1, epochs + 1):
         model.train()
-        train_loss = train_acc = 0
+        sum_loss = sum_acc = 0
 
         # in notebook
         # pabr = notebook.tqdm(enumerate(train_loader), file=sys.stdout)
@@ -51,19 +51,16 @@ def train(model, device, optimizer, criterion, epochs, train_loader, valid_loade
             loss.backward()
             optimizer.step()
 
-            train_loss += loss.item()
-            train_acc += acc
+            sum_loss += loss.item()
+            sum_acc += acc
 
-            acc = train_acc / (batch_idx * train_loader.batch_size + len(data))
-            loss = train_loss / (batch_idx * train_loader.batch_size + len(data))
+            acc = sum_acc / (batch_idx + 1)
+            loss = sum_loss / (batch_idx + 1)
             pbar.set_postfix(epoch=f'{epoch}/{epochs}', loss='{:.6f}, acc={:.3f}'.format(loss, acc))
         pbar.close()
 
-        train_loss = train_loss / len(train_loader)
-        train_acc = train_acc / len(train_loader.dataset)
-
-        history['train_loss'].append(train_loss)
-        history['train_acc'].append(train_acc)
+        history['train_loss'].append(sum_loss / (batch_idx + 1))
+        history['train_acc'].append(sum_acc / (batch_idx + 1))
 
         if valid_loader is not None:
             valid_loss, valid_acc = evaluate(model, device, criterion, valid_loader)
@@ -83,7 +80,7 @@ def evaluate(model, device, criterion, data_loader):
     :return: (valid or test) loss and acc
     """
     model.eval()
-    total_loss = total_acc = 0
+    sum_loss = sum_acc = 0
 
     with torch.no_grad():
         # in notebook
@@ -99,16 +96,16 @@ def evaluate(model, device, criterion, data_loader):
             loss = criterion(output, target)
             acc = calc_acc(output, target)
 
-            total_loss += loss.item()
-            total_acc += acc
+            sum_loss += loss.item()
+            sum_acc += acc
 
-            acc = total_acc / (batch_idx * data_loader.batch_size + len(data))
-            loss = total_loss / (batch_idx * data_loader.batch_size + len(data))
+            acc = sum_acc / (batch_idx + 1)
+            loss = sum_loss / (batch_idx + 1)
             pbar.set_postfix(loss='{:.6f}, acc={:.3f}'.format(loss, acc))
         pbar.close()
 
-    total_loss = total_loss / len(data_loader)
-    total_acc = total_acc / len(data_loader.dataset)
+    total_loss = sum_loss / (batch_idx + 1)
+    total_acc = sum_acc / (batch_idx + 1)
 
     return total_loss, total_acc
 
