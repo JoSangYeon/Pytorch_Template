@@ -83,7 +83,7 @@ def main():
 
     # Test
     print("============================= Test =============================")
-    test_loss, test_acc = evaluate(model, device, test_loader, criterion)
+    test_loss, test_acc = evaluate(model, device, criterion, test_loader)
     print("test loss : {:.6f}".format(test_loss))
     print("test acc : {:.3f}".format(test_acc))
 
