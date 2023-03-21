@@ -1,5 +1,6 @@
 # https://github.com/HideOnHouse/TorchBase
 
+import os
 import pickle
 import pandas as pd
 import numpy as np
@@ -12,9 +13,9 @@ import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
 from sklearn.model_selection import train_test_split
 
-from dataset import MyDataset
+from dataset import *
+from learning import *
 from model import get_Model
-from learning import train, evaluate, calc_acc
 from inference import inference
 
 def draw_history(history):
@@ -35,7 +36,30 @@ def draw_history(history):
 
     plt.show()
 
+def set_device(device_num=0):
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    if device == 'cuda':
+        device += ':{}'.format(device_num)
+    return device
+
+def set_save_path(model_name, epochs, batch_size):
+    directory = os.path.join('models', f'{model_name}_e{epochs}_bs{batch_size}')
+    try:
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+    except OSError:
+        print('Error: Creating directory. ' + directory)
+    return directory
+
 def main():
+    # args
+    model_name = "Mymodel"
+    epochs = 15
+    batch_size = 128
+    device = set_device(device_num=0)
+    save_path = set_save_path(model_name, epochs, batch_size)
+
+    # Datasets
     train_path = ""
     test_path = ""
 
@@ -64,22 +88,20 @@ def main():
     valid_dataset = MyDataset(valid_x, valid_y)
     test_dataset = MyDataset(test_x, test_y)
 
-    train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
-    valid_loader = DataLoader(valid_dataset, batch_size=32)
-    test_loader = DataLoader(test_dataset, batch_size=32)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    valid_loader = DataLoader(valid_dataset, batch_size=batch_size)
+    test_loader = DataLoader(test_dataset, batch_size=batch_size)
 
     # label_tags
     label_tags = ['T-Shirt', 'Trouser', 'Pullover', 'Dress', 'Coat', 'Sandal', 'Shirt', 'Sneaker', 'Bag', 'Ankle Boot']
 
-    model_name = "MyModel_1"
-    model = get_Model(model_name)
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    model = get_Model(model_name); model.to(device)
     optimizer = torch.optim.AdamW(model.parameters())
     criterion = torch.nn.CrossEntropyLoss()
 
     # train
     print("============================= Train =============================")
-    history = train(model, device, optimizer, criterion, 16, train_loader, valid_loader)
+    history = train(model, device, optimizer, criterion, epochs, save_path, train_loader, valid_loader)
 
     # Test
     print("============================= Test =============================")
@@ -87,12 +109,12 @@ def main():
     print("test loss : {:.6f}".format(test_loss))
     print("test acc : {:.3f}".format(test_acc))
 
-    file_name = model_name
-    torch.save(model, f"models/{file_name}.pt")
-    with open(f"models/{file_name}_history.pickle", 'wb') as f:
-        pickle.dump(history, f, pickle.HIGHEST_PROTOCOL)
+    # save model
+    torch.save(model.state_dict, os.path.join(save_path, f"{model_name}.pt"))
+    # with open(f"models/{file_name}_history.pickle", 'wb') as f:
+    #     pickle.dump(history, f, pickle.HIGHEST_PROTOCOL)
 
-    # print(history)
+    # plot history
     draw_history(history)
 
     # Inference
