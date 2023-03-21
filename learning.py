@@ -58,13 +58,13 @@ def train(model, device, optimizer, criterion,
             sum_loss += loss.item()
             sum_acc += acc
 
-            acc = sum_acc / (batch_idx + 1)
             loss = sum_loss / (batch_idx + 1)
+            acc = sum_acc / (batch_idx * train_loader.batch_size + len(data))
             pbar.set_postfix(epoch=f'{epoch}/{epochs}', loss='{:.6f}, acc={:.3f}'.format(loss, acc))
         pbar.close()
 
         train_loss = sum_loss / (batch_idx + 1)
-        train_acc = sum_acc / (batch_idx + 1)
+        train_acc = sum_acc / (batch_idx * train_loader.batch_size + len(data))
         history['train_loss'].append(train_loss)
         history['train_acc'].append(train_acc)
 
@@ -115,13 +115,13 @@ def evaluate(model, device, criterion, data_loader):
             sum_loss += loss.item()
             sum_acc += acc
 
-            acc = sum_acc / (batch_idx + 1)
             loss = sum_loss / (batch_idx + 1)
+            acc = sum_acc / (batch_idx * data_loader.batch_size + len(data))
             pbar.set_postfix(loss='{:.6f}, acc={:.3f}'.format(loss, acc))
         pbar.close()
 
     total_loss = sum_loss / (batch_idx + 1)
-    total_acc = sum_acc / (batch_idx + 1)
+    total_acc = sum_acc / (batch_idx * data_loader.batch_size + len(data))
 
     return total_loss, total_acc
 
