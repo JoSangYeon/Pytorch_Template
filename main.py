@@ -110,7 +110,7 @@ def main():
     print("test acc : {:.3f}".format(test_acc))
 
     # save model
-    torch.save(model.state_dict, os.path.join(save_path, f"{model_name}.pt"))
+    torch.save(model.state_dict(), os.path.join(save_path, f"{model_name}.pt"))
     # with open(f"models/{file_name}_history.pickle", 'wb') as f:
     #     pickle.dump(history, f, pickle.HIGHEST_PROTOCOL)
 
