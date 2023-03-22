@@ -18,7 +18,7 @@ from learning import *
 from model import get_Model
 from inference import inference
 
-def draw_history(history):
+def draw_history(history, save_path=None):
     train_loss = history["train_loss"]
     train_acc = history["train_acc"]
     valid_loss = history["valid_loss"]
@@ -34,7 +34,10 @@ def draw_history(history):
     plt.plot(valid_acc, label="valid")
     plt.legend()
 
-    plt.show()
+    if save_path is None:
+        plt.show()
+    else:
+        plt.savefig(os.path.join(save_path, 'train_plot.png'), dpi=300)
 
 def set_device(device_num=0):
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -112,8 +115,8 @@ def main():
 
     # save model
     torch.save(model.state_dict(), os.path.join(save_path, f"{model_name}.pt"))
-    # with open(f"models/{file_name}_history.pickle", 'wb') as f:
-    #     pickle.dump(history, f, pickle.HIGHEST_PROTOCOL)
+    with open(os.path.join(save_path, "train_history.pickle"), 'wb') as f:
+        pickle.dump(history, f, pickle.HIGHEST_PROTOCOL)
 
     # plot history
     draw_history(history)
