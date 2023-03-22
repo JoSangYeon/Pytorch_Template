@@ -75,6 +75,7 @@ def train(model, device, optimizer, criterion,
 
             history['valid_loss'].append(valid_loss)
             history['valid_acc'].append(valid_acc)
+        print()
 
         torch.save({
             'model_state_dict': model.state_dict(),
