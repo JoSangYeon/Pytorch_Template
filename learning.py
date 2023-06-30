@@ -79,7 +79,6 @@ def train(model, device, optimizer, criterion,
 
         torch.save({
             'model_state_dict': model.state_dict(),
-            'optimizer_state_dict': optimizer.state_dict(),
             'epoch' : epoch,
             'train_loss' : train_loss,
             'train_acc' : train_acc,
