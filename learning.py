@@ -45,8 +45,8 @@ def train(model, device, optimizer, criterion,
         # pabr = notebook.tqdm(enumerate(train_loader), file=sys.stdout)
 
         # in interpreter
-        pbar = tqdm(enumerate(train_loader), file=sys.stdout)
-        for batch_idx, (data, target) in pbar:
+        pbar = tqdm(train_loader, file=sys.stdout)
+        for batch_idx, (data, target) in enumerate(pbar):
             data, target = data.to(device), target.to(device)
             mb_len = len(target)
 
@@ -106,9 +106,8 @@ def evaluate(model, device, criterion, data_loader):
         # pabr = notebook.tqdm(enumerate(valid_loader), file=sys.stdout)
 
         # in interpreter
-        pbar = tqdm(enumerate(data_loader), file=sys.stdout)
-
-        for batch_idx, (data, target) in pbar:
+        pbar = tqdm(data_loader, file=sys.stdout)
+        for batch_idx, (data, target) in enumerate(pbar):
             data, target = data.to(device), target.to(device)
             mb_len = len(target)
 
