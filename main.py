@@ -66,9 +66,9 @@ def main():
     test_loader = DataLoader(test_dataset, batch_size=batch_size)
 
     ## Check Train, Valid, Test Dataset Shape
-    print("The Shape of Train Images: ", train_dataset.shape())
-    print("The Shape of Valid Images: ", valid_dataset.shape())
-    print("The Shape of Test Images: ", test_dataset.shape())
+    print("The Length of Train Data: ", len(train_dataset))
+    print("The Length of Valid Data: ", len(valid_dataset))
+    print("The Length of Test Data: ", len(test_dataset))
 
     # label_tags
     label_tags = [] #['T-Shirt', 'Trouser', 'Pullover', 'Dress', 'Coat', 'Sandal', 'Shirt', 'Sneaker', 'Bag', 'Ankle Boot']
@@ -80,7 +80,7 @@ def main():
 
     # train
     print("============================= Train =============================")
-    history = train(model, device, optimizer, criterion, epochs, save_path, train_loader, valid_loader)
+    _ = train(model, device, optimizer, criterion, epochs, save_path, train_loader, valid_loader)
 
     # Test
     print("============================= Test =============================")
@@ -89,7 +89,7 @@ def main():
     print("test acc : {:.3f}".format(test_acc))
 
     # plot history
-    draw_history(history)
+    # draw_history(history)
 
     # Inference
     # print("=========================== Inference ===========================")
