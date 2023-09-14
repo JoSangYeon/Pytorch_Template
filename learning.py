@@ -1,3 +1,4 @@
+import wandb
 import os
 import sys
 
@@ -16,7 +17,7 @@ def calc_acc(output, label):
 
 
 def train(model, device, optimizer, criterion,
-          epochs, save_path, train_loader, valid_loader=None) -> dict:
+          epochs, save_path, train_loader, valid_loader=None):
     """
     :param model: your model
     :param device: your device(cuda or cpu)
@@ -26,14 +27,7 @@ def train(model, device, optimizer, criterion,
     :param save_path : checkpoint path
     :param train_loader: train dataset
     :param valid_loader: valid dataset
-    :return: history dictionary that contains train_loss, train_acc, valid_loss, valid_acc as list
     """
-    history = {
-        'train_loss': [],
-        'train_acc': [],
-        'valid_loss': [],
-        'valid_acc': []
-    }
     model.to(device)
     for epoch in range(1, epochs + 1):
         model.train()
@@ -62,31 +56,34 @@ def train(model, device, optimizer, criterion,
 
             loss = sum_loss / (batch_idx + 1)
             acc = sum_acc / (batch_idx * bs + mb_len)
-            pbar.set_postfix(epoch=f'{epoch}/{epochs}', loss='{:.6f}, acc={:.3f}'.format(loss, acc))
+            pbar.set_postfix(epoch=f'{epoch}/{epochs}', loss='{:.4f}, acc={:.4f}'.format(loss, acc))
         pbar.close()
 
         train_loss = sum_loss / (batch_idx + 1)
         train_acc = sum_acc / (batch_idx * bs + mb_len)
-        history['train_loss'].append(train_loss)
-        history['train_acc'].append(train_acc)
+
+        wandb.log({'train_loss': train_loss,
+                   'train_acc': train_acc},
+                  step=epoch)
 
         if valid_loader is not None:
             valid_loss, valid_acc = evaluate(model, device, criterion, valid_loader)
 
-            history['valid_loss'].append(valid_loss)
-            history['valid_acc'].append(valid_acc)
+            wandb.log({'valid_loss': valid_loss,
+                       'valid_acc': valid_acc},
+                      step=epoch)
         print()
 
         torch.save({
             'model_state_dict': model.state_dict(),
-            'epoch' : epoch,
-            'train_loss' : train_loss,
-            'train_acc' : train_acc,
-            'valid_loss' : valid_loss,
-            'valid_acc' : valid_acc,
+            'epoch': epoch,
+            'train_loss': train_loss,
+            'train_acc': train_acc,
+            'valid_loss': valid_loss,
+            'valid_acc': valid_acc,
         }, os.path.join(save_path, f'checkpoint_{epoch}.tar'))
 
-    return history
+    return model
 
 
 def evaluate(model, device, criterion, data_loader):
@@ -120,7 +117,7 @@ def evaluate(model, device, criterion, data_loader):
 
             loss = sum_loss / (batch_idx + 1)
             acc = sum_acc / (batch_idx * bs + mb_len)
-            pbar.set_postfix(loss='{:.6f}, acc={:.3f}'.format(loss, acc))
+            pbar.set_postfix(loss='{:.4f}, acc={:.4f}'.format(loss, acc))
         pbar.close()
 
     total_loss = sum_loss / (batch_idx + 1)
