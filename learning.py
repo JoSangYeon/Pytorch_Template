@@ -9,12 +9,7 @@ import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
 from tqdm import tqdm, notebook
 
-
-def calc_acc(output, label):
-    o_val, o_idx = torch.max(output, dim=-1)
-    l_val, l_idx = torch.max(label, dim=-1)
-    return (o_idx == l_idx).sum().item()
-
+from utils import get_each_output, calc_acc
 
 def train(model, device, optimizer, criterion,
           epochs, save_path, train_loader, valid_loader=None):
@@ -46,6 +41,7 @@ def train(model, device, optimizer, criterion,
 
             optimizer.zero_grad()
             output = model(data)
+            output, _ = get_each_output(output)
             loss = criterion(output, target)
             acc = calc_acc(output, target)
             loss.backward()
@@ -109,6 +105,7 @@ def evaluate(model, device, criterion, data_loader):
             mb_len = len(target)
 
             output = model(data)
+            output, _ = get_each_output(output)
             loss = criterion(output, target)
             acc = calc_acc(output, target)
 

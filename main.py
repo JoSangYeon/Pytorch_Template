@@ -1,7 +1,7 @@
 # https://github.com/HideOnHouse/TorchBase
 
-import wandb
 import os
+import wandb
 import pickle
 import pandas as pd
 import numpy as np
@@ -17,7 +17,8 @@ from dataset import *
 from learning import *
 from model import *
 from inference import *
-from utils import *
+from utils import DataParallelModel, DataParallelCriterion
+from utils import set_device, set_save_path, draw_history
 SEED = 17
 
 def main():
@@ -27,14 +28,14 @@ def main():
 
     wandb.init(project=project_name)
     wandb.run.name = model_name
-    wandb.run.save()
+    # wandb.run.save()
 
     # args
     epochs = 15
     batch_size = 128
     lr = 1e-3
 
-    device = set_device(device_num=0)
+    main_device, device_ids = set_device(main_device_num=0, using_device_num=4)
     save_path = set_save_path(model_name, epochs, batch_size)
 
     config = {
@@ -74,17 +75,18 @@ def main():
     label_tags = [] #['T-Shirt', 'Trouser', 'Pullover', 'Dress', 'Coat', 'Sandal', 'Shirt', 'Sneaker', 'Bag', 'Ankle Boot']
 
     # modeling
-    model = MyModel(); model.to(device)
+    model = DataParallelModel(MyModel(), device_ids=device_ids)#; model.to(device)
     optimizer = torch.optim.AdamW(model.parameters())
     criterion = torch.nn.CrossEntropyLoss()
+    criterion = DataParallelCriterion(criterion, device_ids=device_ids)
 
     # train
     print("============================= Train =============================")
-    _ = train(model, device, optimizer, criterion, epochs, save_path, train_loader, valid_loader)
+    _ = train(model, main_device, optimizer, criterion, epochs, save_path, train_loader, valid_loader)
 
     # Test
     print("============================= Test =============================")
-    test_loss, test_acc = evaluate(model, device, criterion, test_loader)
+    test_loss, test_acc = evaluate(model, main_device, criterion, test_loader)
     print("test loss : {:.6f}".format(test_loss))
     print("test acc : {:.3f}".format(test_acc))
 
@@ -93,8 +95,9 @@ def main():
 
     # Inference
     # print("=========================== Inference ===========================")
-    # inference(device, criterion, infer_dataloader)
+    # inference(main_device, criterion, infer_dataloader)
 
 
 if __name__ == '__main__':
     main()
+    # CUDA_VISIBLE_DEVICES=2,3,4,5 python main.py
