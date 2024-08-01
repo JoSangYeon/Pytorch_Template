@@ -5,7 +5,7 @@ import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
 
 class MyDataset(Dataset):
-    def __init__(self, data):
+    def __init__(self, data, *args):
         super(MyDataset, self).__init__()
         self.data = data
         pass
